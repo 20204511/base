@@ -1,0 +1,135 @@
+CREATE TABLE areaempresa (
+    idarea      INTEGER NOT NULL,
+    descripcion VARCHAR2(200),
+    ubicacion   VARCHAR2(100),
+    nombre      VARCHAR2(50)
+);
+
+ALTER TABLE areaempresa ADD CONSTRAINT areaempresa_pk PRIMARY KEY ( idarea );
+
+CREATE TABLE auditoria (
+    idauditoria        INTEGER NOT NULL,
+    resultadoaudi      VARCHAR2(50),
+    fechaauditoria     DATE,
+    auditorresponsable VARCHAR2(50),
+    observaciones      VARCHAR2(200)
+);
+
+ALTER TABLE auditoria ADD CONSTRAINT auditoria_pk PRIMARY KEY ( idauditoria );
+
+CREATE TABLE doc (
+    iddoc                  INTEGER NOT NULL,
+    titulo                 VARCHAR2(20),
+    auditoria_idauditoria  INTEGER NOT NULL,
+    areaempresa_idarea     INTEGER NOT NULL,
+    eventambiente_idevento INTEGER NOT NULL,
+    proyect_idproyect      INTEGER NOT NULL,
+    descripcion            VARCHAR2(200),
+    estado                 VARCHAR2(20) NOT NULL,
+    fechacreacion          DATE,
+    tipodoc                VARCHAR2(20),
+    autor                  VARCHAR2(20),
+    version                VARCHAR2(20),
+    ubicacionfisica        VARCHAR2(100)
+);
+
+CREATE UNIQUE INDEX doc__idx ON
+    doc (
+        eventambiente_idevento
+    ASC );
+
+ALTER TABLE doc ADD CONSTRAINT doc_pk PRIMARY KEY ( iddoc );
+
+CREATE TABLE eventambiente (
+    idevento          INTEGER NOT NULL,
+    doc_iddoc         INTEGER NOT NULL,
+    tipoevento        VARCHAR2(20),
+    fechaevento       DATE,
+    descripcionevento VARCHAR2(200),
+    ubicacionevento   VARCHAR2(50)
+);
+
+CREATE UNIQUE INDEX eventambiente__idx ON
+    eventambiente (
+        doc_iddoc
+    ASC );
+
+ALTER TABLE eventambiente ADD CONSTRAINT eventambiente_pk PRIMARY KEY ( idevento );
+
+CREATE TABLE normaambiental (
+    idnormativa      INTEGER NOT NULL,
+    nombrenorma      VARCHAR2(20),
+    descripcion      VARCHAR2(200),
+    fechaemision     DATE,
+    fechavencimiento DATE,
+    enlacenorma      VARCHAR2(50)
+);
+
+ALTER TABLE normaambiental ADD CONSTRAINT normaambiental_pk PRIMARY KEY ( idnormativa );
+
+CREATE TABLE normativadoc (
+    normaambiental_idnormativa INTEGER NOT NULL,
+    doc_iddoc                  INTEGER NOT NULL
+);
+
+CREATE TABLE proyect (
+    idproyect     INTEGER NOT NULL,
+    nombreproyect VARCHAR2(50),
+    descripcion   VARCHAR2(100),
+    liderproyect  VARCHAR2(20),
+    fechainicio   DATE,
+    fechafin      DATE
+);
+
+ALTER TABLE proyect ADD CONSTRAINT proyect_pk PRIMARY KEY ( idproyect );
+
+CREATE TABLE usuario (
+    idusuario  INTEGER NOT NULL,
+    nombre     VARCHAR2(20),
+    contrasena VARCHAR2(20),
+    cargo      VARCHAR2(20),
+    apellido   VARCHAR2(20)
+);
+
+ALTER TABLE usuario ADD CONSTRAINT usuario_pk PRIMARY KEY ( idusuario );
+
+CREATE TABLE usuariodoc (
+    doc_iddoc         INTEGER NOT NULL,
+    usuario_idusuario INTEGER NOT NULL
+);
+
+ALTER TABLE doc
+    ADD CONSTRAINT doc_areaempresa_fk FOREIGN KEY ( areaempresa_idarea )
+        REFERENCES areaempresa ( idarea );
+
+ALTER TABLE doc
+    ADD CONSTRAINT doc_auditoria_fk FOREIGN KEY ( auditoria_idauditoria )
+        REFERENCES auditoria ( idauditoria );
+
+ALTER TABLE doc
+    ADD CONSTRAINT doc_eventambiente_fk FOREIGN KEY ( eventambiente_idevento )
+        REFERENCES eventambiente ( idevento );
+
+ALTER TABLE doc
+    ADD CONSTRAINT doc_proyect_fk FOREIGN KEY ( proyect_idproyect )
+        REFERENCES proyect ( idproyect );
+
+ALTER TABLE eventambiente
+    ADD CONSTRAINT eventambiente_doc_fk FOREIGN KEY ( doc_iddoc )
+        REFERENCES doc ( iddoc );
+
+ALTER TABLE normativadoc
+    ADD CONSTRAINT normativadoc_doc_fk FOREIGN KEY ( doc_iddoc )
+        REFERENCES doc ( iddoc );
+
+ALTER TABLE normativadoc
+    ADD CONSTRAINT normativadoc_normaambiental_fk FOREIGN KEY ( normaambiental_idnormativa )
+        REFERENCES normaambiental ( idnormativa );
+
+ALTER TABLE usuariodoc
+    ADD CONSTRAINT usuariodoc_doc_fk FOREIGN KEY ( doc_iddoc )
+        REFERENCES doc ( iddoc );
+
+ALTER TABLE usuariodoc
+    ADD CONSTRAINT usuariodoc_usuario_fk FOREIGN KEY ( usuario_idusuario )
+        REFERENCES usuario ( idusuario );
